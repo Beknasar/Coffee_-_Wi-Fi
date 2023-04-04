@@ -40,9 +40,11 @@ def add_cafe():
     return render_template('add.html', form=form)
 
 
+# path = "D:\coding\100DaysOfCode\Web Development\Day62 - Advanced - Flask, WTForms, Bootstrap and CSV - Coffee & Wifi project\Coffee_&_wifi\cafe-data.csv"
+
 @app.route('/cafes')
 def cafes():
-    with open('cafe-data.csv', newline='') as csv_file:
+    with open('cafe-data.csv', newline='', encoding="utf8") as csv_file:
         csv_data = csv.reader(csv_file, delimiter=',')
         list_of_rows = []
         for row in csv_data:
