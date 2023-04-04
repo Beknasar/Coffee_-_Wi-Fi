@@ -1,9 +1,9 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField
 from wtforms.validators import DataRequired, URL
-import csv, pandas
+import csv
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -13,11 +13,11 @@ Bootstrap(app)
 class CafeForm(FlaskForm):
     cafe = StringField(label='Cafe name', validators=[DataRequired()])
     location = StringField(label='Cafe Location on Google Maps(URL)', validators=[DataRequired(), URL(require_tld=True)])
-    opening_time = StringField(label="Opening Time e.g. 8AM", validators=[DataRequired()])
-    closing_time = StringField(label="Closing Time e.g. 5:30PM", validators=[DataRequired()])
+    open = StringField(label="Opening Time e.g. 8AM", validators=[DataRequired()])
+    close = StringField(label="Closing Time e.g. 5:30PM", validators=[DataRequired()])
     coffee_rating = SelectField(label="Coffee Rating", choices=[("✘", "✘"), ("☕", "☕"), ("☕☕", "☕☕"), ("☕☕☕", "☕☕☕"), ("☕☕☕☕", "☕☕☕☕"), ("☕☕☕☕☕", "☕☕☕☕☕")])
     wifi_rating = SelectField(label="Wifi Strength Rating", choices=[("✘", "✘"), ("💪", "💪"), ("💪💪", "💪💪"), ("💪💪💪", "💪💪💪"), ("💪💪💪💪", "💪💪💪💪"), ("💪💪💪💪💪", "💪💪💪💪💪")])
-    power_socket = SelectField(label="Power Socket Availability", choices=[("✘", "✘"), ("🔌", "🔌"), ("🔌🔌", "🔌🔌"), ("🔌🔌🔌", "🔌🔌🔌"), ("🔌🔌🔌🔌", "🔌🔌🔌🔌"), ("🔌🔌🔌🔌🔌", "🔌🔌🔌🔌🔌")])
+    power_rating = SelectField(label="Power Socket Availability", choices=[("✘", "✘"), ("🔌", "🔌"), ("🔌🔌", "🔌🔌"), ("🔌🔌🔌", "🔌🔌🔌"), ("🔌🔌🔌🔌", "🔌🔌🔌🔌"), ("🔌🔌🔌🔌🔌", "🔌🔌🔌🔌🔌")])
     submit = SubmitField(label='Submit')
 
 # ---------------------------------------------------------------------------
@@ -33,17 +33,15 @@ def home():
 def add_cafe():
     form = CafeForm()
     if form.validate_on_submit():
-        form_data = {
-            "Cafe Name": form.cafe.data,
-            "Location": form.location.data,
-            "Open": form.opening_time.data,
-            "Close": form.opening_time.data,
-            "Coffee": form.coffee_rating.data,
-            "Wifi": form.wifi_rating.data,
-            "Power": form.power_socket.data
-        }
-        data = pandas.DataFrame(form_data, index=[0])
-        data.to_csv("cafe-data.csv", mode="a", index=False, header=False)
+        with open("cafe-data.csv", mode="a", encoding="utf8") as csv_file:
+            csv_file.write(f"\n{form.cafe.data},"
+                           f"{form.location.data},"
+                           f"{form.open.data},"
+                           f"{form.close.data},"
+                           f"{form.coffee_rating.data},"
+                           f"{form.wifi_rating.data},"
+                           f"{form.power_rating.data}")
+        return redirect(url_for('cafes'))
     return render_template('add.html', form=form)
 
 
